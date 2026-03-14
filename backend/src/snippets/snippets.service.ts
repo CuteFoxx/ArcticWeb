@@ -32,14 +32,20 @@ export class SnippetsService {
       page = 1,
       limit = 10,
       search,
+      tag,
       sortBy = 'createdAt',
       order = 'desc',
     } = query;
     const skip = (page - 1) * limit;
 
-    const filter: Record<string, unknown> = search
-      ? { $text: { $search: search } }
-      : {};
+    const filter: Record<string, unknown> = {};
+    if (search) {
+      const regex = { $regex: search, $options: 'i' };
+      filter.$or = [{ title: regex }, { content: regex }];
+    }
+    if (tag) {
+      filter.tags = tag;
+    }
 
     const [data, total] = await Promise.all([
       this.snippetModel

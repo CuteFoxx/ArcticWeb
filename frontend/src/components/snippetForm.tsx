@@ -14,6 +14,7 @@ import { FieldGroup } from "@/components/ui/field-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { FormItem } from "@/components/ui/form-item";
+import { Tag } from "@/components/ui/tag";
 
 interface SnippetFormProps {
   defaultValues?: Snippet;
@@ -96,20 +97,8 @@ export function SnippetForm({ defaultValues, onSubmit }: SnippetFormProps) {
 
       <FieldGroup label="Tags">
         <FormItem>
-          {tags.map((tag) => (
-            <span
-              key={tag}
-              className="inline-flex items-center gap-1 rounded bg-gray-200 px-2 py-1 text-sm"
-            >
-              {tag}
-              <Button
-                type="button"
-                onClick={() => removeTag(tag)}
-                className="bg-transparent p-0 text-gray-600"
-              >
-                &times;
-              </Button>
-            </span>
+          {tags.map((t) => (
+            <Tag key={t} label={t} onRemove={() => removeTag(t)} />
           ))}
         </FormItem>
         <FormItem className="flex gap-2">

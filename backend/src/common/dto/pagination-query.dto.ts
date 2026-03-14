@@ -8,6 +8,10 @@ export class PaginationQueryDto extends PaginationDto {
 
   @IsOptional()
   @IsString()
+  tag?: string;
+
+  @IsOptional()
+  @IsString()
   sortBy?: string = 'createdAt';
 
   @IsOptional()
