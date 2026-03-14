@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
 // Server-side: Docker-internal URL for rewrites and image optimization
-const internalBackendUrl = process.env.BACKEND_URL!;
+const internalBackendUrl =
+  process.env.BACKEND_URL || "http://localhost:5000";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   reactCompiler: true,
   turbopack: {
     root: "..",
