@@ -5,7 +5,6 @@ const internalBackendUrl =
   process.env.BACKEND_URL || "http://localhost:5000";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
   reactCompiler: true,
   turbopack: {
     root: "..",
