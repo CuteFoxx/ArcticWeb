@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { isValidObjectId, Model } from 'mongoose';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { Snippet, SnippetDocument } from './snippet.schema';
 import { CreateSnippetDto } from './dto/create-snippet.dto';
@@ -12,6 +16,12 @@ export class SnippetsService {
     @InjectModel(Snippet.name)
     private readonly snippetModel: Model<SnippetDocument>,
   ) {}
+
+  private validateId(id: string): void {
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException(`Invalid ID: ${id}`);
+    }
+  }
 
   async create(createSnippetDto: CreateSnippetDto): Promise<Snippet> {
     return this.snippetModel.create(createSnippetDto);
@@ -51,6 +61,7 @@ export class SnippetsService {
   }
 
   async findOne(id: string): Promise<Snippet> {
+    this.validateId(id);
     const snippet = await this.snippetModel.findById(id).exec();
 
     if (!snippet) {
@@ -64,6 +75,7 @@ export class SnippetsService {
     id: string,
     updateSnippetDto: UpdateSnippetDto,
   ): Promise<Snippet> {
+    this.validateId(id);
     const snippet = await this.snippetModel
       .findByIdAndUpdate(id, updateSnippetDto, { new: true })
       .exec();
@@ -76,6 +88,7 @@ export class SnippetsService {
   }
 
   async remove(id: string): Promise<Snippet> {
+    this.validateId(id);
     const snippet = await this.snippetModel.findByIdAndDelete(id).exec();
 
     if (!snippet) {

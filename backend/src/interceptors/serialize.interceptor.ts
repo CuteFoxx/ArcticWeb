@@ -4,11 +4,24 @@ import {
   NestInterceptor,
   UseInterceptors,
 } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { map, Observable } from 'rxjs';
 
 interface ClassConstructor {
-  new (...args: any[]): object;
+  new (...args: unknown[]): object;
+}
+
+interface MongooseDocument {
+  _id?: string;
+  toJSON?(): Record<string, unknown>;
+}
+
+interface PaginatedResponse {
+  data: MongooseDocument[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 export function Serialize(dto: ClassConstructor) {
@@ -18,26 +31,41 @@ export function Serialize(dto: ClassConstructor) {
 export class SerializeInterceptor implements NestInterceptor {
   constructor(private dto: ClassConstructor) {}
 
-  intercept(
-    context: ExecutionContext,
-    next: CallHandler<any>,
-  ): Observable<any> | Promise<Observable<any>> {
+  private toPlain(data: MongooseDocument): Record<string, unknown> {
+    const obj: Record<string, unknown> = data.toJSON
+      ? data.toJSON()
+      : { ...data };
+    if (obj._id != null) {
+      obj.id = (obj._id as { toString(): string }).toString();
+    }
+    return obj;
+  }
+
+  intercept(_context: ExecutionContext, next: CallHandler): Observable<object> {
     return next.handle().pipe(
-      map((data: any) => {
-        if (data && Array.isArray(data.data) && data.meta) {
+      map((data: MongooseDocument | PaginatedResponse) => {
+        if ('data' in data && Array.isArray(data.data) && 'total' in data) {
+          const paginated = data;
           return {
-            data: data.data.map((item: any) =>
-              plainToClass(this.dto, item, {
+            data: paginated.data.map((item) =>
+              plainToInstance(this.dto, this.toPlain(item), {
                 excludeExtraneousValues: true,
               }),
             ),
-            meta: data.meta,
+            total: paginated.total,
+            page: paginated.page,
+            limit: paginated.limit,
+            totalPages: paginated.totalPages,
           };
         }
 
-        return plainToClass(this.dto, data, {
-          excludeExtraneousValues: true,
-        });
+        return plainToInstance(
+          this.dto,
+          this.toPlain(data as MongooseDocument),
+          {
+            excludeExtraneousValues: true,
+          },
+        );
       }),
     );
   }
