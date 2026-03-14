@@ -1,0 +1,44 @@
+services:
+  backend:
+    build:
+      dockerfile: Dockerfile
+      context: ./backend
+      target: debug
+    volumes:
+      - ./backend:/src
+      - /src/node_modules
+      - ./backend/uploads:/src/uploads
+    env_file:
+      - .env
+    ports:
+      - "${PORT}:${PORT}"
+      - "${DEBUG_PORT}:${DEBUG_PORT}"
+  frontend:
+    build:
+      dockerfile: Dockerfile
+      context: ./frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - WATCHPACK_POLLING=1000
+      - BACKEND_URL=${BACKEND_URL}
+    depends_on:
+      - backend
+    ports:
+      - 3000:3000
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./database:/data/db
+    ports:
+      - "${MONGODB_PORT}:${MONGODB_PORT}"
+    restart: always
+    healthcheck:
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongodb:27017'}]}) }" | mongosh --port 27017 --quiet
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      retries: 30
