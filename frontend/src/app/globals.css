@@ -124,10 +124,6 @@
     @apply bg-background text-foreground;
   }
   body {
-    /* @apply px-6 max-w-480 w-full mx-auto md:px-10! xl:px-41.25! bg-transparent; */
-  }
-
-  .container {
-    @apply max-w-480 xl:px-18 mx-auto w-full bg-transparent px-3 md:px-10;
+    @apply max-w-480 md:px-10! xl:px-41.25! mx-auto w-full bg-transparent px-6 py-2 md:py-4 lg:py-6;
   }
 }

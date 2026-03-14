@@ -26,10 +26,24 @@ function useModal() {
   return ctx;
 }
 
-function Root({ children }: { children: ReactNode }) {
-  const [open, setOpen] = useState(false);
-  const onOpen = useCallback(() => setOpen(true), []);
-  const onClose = useCallback(() => setOpen(false), []);
+function Root({
+  children,
+  defaultOpen = false,
+  onOpenChange,
+}: {
+  children: ReactNode;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const onOpen = useCallback(() => {
+    setOpen(true);
+    onOpenChange?.(true);
+  }, [onOpenChange]);
+  const onClose = useCallback(() => {
+    setOpen(false);
+    onOpenChange?.(false);
+  }, [onOpenChange]);
 
   return (
     <ModalContext value={{ open, onOpen, onClose }}>{children}</ModalContext>

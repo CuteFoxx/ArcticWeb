@@ -12,8 +12,7 @@ import type { Snippet } from "@/types/snippet";
 
 export function SnippetsView() {
   const { snippets, setSnippets } = useSnippets();
-  const [search, setSearch] = useState("");
-  const [tag, setTag] = useState("");
+  const [editingSnippet, setEditingSnippet] = useState<Snippet | null>(null);
 
   const handleCreate = async (data: SnippetFormValues) => {
     const res = await api.post<Snippet>("/snippets", data);
@@ -21,7 +20,17 @@ export function SnippetsView() {
   };
 
   const handleEdit = (snippet: Snippet) => {
-    // TODO: open edit modal
+    setEditingSnippet(snippet);
+  };
+
+  const handleUpdate = async (data: SnippetFormValues) => {
+    if (!editingSnippet) return;
+    const res = await api.patch<Snippet>(
+      `/snippets/${editingSnippet.id}`,
+      data,
+    );
+    setSnippets(snippets.map((s) => (s.id === res.data.id ? res.data : s)));
+    setEditingSnippet(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -46,18 +55,33 @@ export function SnippetsView() {
         </Modal.Root>
       </div>
 
-      <SnippetSearch
-        search={search}
-        onSearchChange={setSearch}
-        tag={tag}
-        onTagChange={setTag}
-      />
+      <SnippetSearch />
 
       <SnippetList
         snippets={snippets}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
+
+      {editingSnippet && (
+        <Modal.Root
+          defaultOpen
+          onOpenChange={(open) => {
+            if (!open) setEditingSnippet(null);
+          }}
+        >
+          <Modal.Content>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Edit Snippet</h2>
+              <Modal.Close />
+            </div>
+            <SnippetForm
+              defaultValues={editingSnippet}
+              onSubmit={handleUpdate}
+            />
+          </Modal.Content>
+        </Modal.Root>
+      )}
     </div>
   );
 }

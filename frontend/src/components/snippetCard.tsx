@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { Snippet } from "@/types/snippet";
 import { Button } from "@/components/ui/button";
 import { Tag } from "@/components/ui/tag";
+import { ExpandableContent } from "@/components/expandableContent";
 
 interface SnippetCardProps {
   snippet: Snippet;
@@ -30,9 +31,16 @@ export function SnippetCard({ snippet, onEdit, onDelete }: SnippetCardProps) {
         >
           {snippet.title}
         </Link>
-        <span className="rounded bg-gray-100 px-2 py-0.5 text-xs">
-          {snippet.type}
-        </span>
+        <Tag
+          label={snippet.type}
+          className={
+            snippet.type === "command"
+              ? "bg-amber-100 text-amber-800"
+              : snippet.type === "link"
+                ? "bg-blue-100 text-blue-800"
+                : "bg-green-100 text-green-800"
+          }
+        />
       </div>
 
       {snippet.type === "command" ? (
@@ -65,9 +73,9 @@ export function SnippetCard({ snippet, onEdit, onDelete }: SnippetCardProps) {
           </Button>
         </div>
       ) : (
-        <p className="mb-3 line-clamp-2 text-sm text-gray-600">
+        <ExpandableContent className="mb-3 text-sm text-gray-600">
           {snippet.content}
-        </p>
+        </ExpandableContent>
       )}
 
       {snippet.tags.length > 0 && (

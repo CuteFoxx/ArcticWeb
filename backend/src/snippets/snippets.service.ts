@@ -44,7 +44,7 @@ export class SnippetsService {
       filter.$or = [{ title: regex }, { content: regex }];
     }
     if (tag) {
-      filter.tags = tag;
+      filter.tags = { $regex: tag, $options: 'i' };
     }
 
     const [data, total] = await Promise.all([
