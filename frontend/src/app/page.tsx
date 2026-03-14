@@ -1,7 +1,9 @@
+import { SnippetForm } from "@/components/snippetForm";
+
 export default async function Home() {
   return (
     <>
-      <h2>Hello world</h2>
+      <SnippetForm />
     </>
   );
 }
